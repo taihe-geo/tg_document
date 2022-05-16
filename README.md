@@ -1,4 +1,4 @@
 # atlas_document
-a website that collects GIS documents or papers or link,and provides convinient way to access gis knowledge.
+收集地信相关的文档和链接，必要时进行翻译，为地信开发者提供一个获取知识的途径。
 
-[atlas document website](https://velvety-twilight-f6f4e3.netlify.app)
+[网站](https://velvety-twilight-f6f4e3.netlify.app)
