@@ -1,0 +1,18 @@
+// https://bulma.io/documentation/overview/start/
+@import "bulma";
+.app{
+    width: 100vw;
+    height: 100vh;
+    background-color:$black-bis;
+}
+.my-search{
+    padding-top: 150px;
+}
+.layout-children-center{
+    width: 100%;
+    margin-top: 100px;
+    padding: 0px 30px;
+}
+.my-table{
+    width: 100%;
+}
