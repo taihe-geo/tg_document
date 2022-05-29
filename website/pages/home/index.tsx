@@ -31,7 +31,7 @@ export default function () {
 								<div className="card-content">
 									<div className="content columns">
 										<span className="column">{item.docType}</span>
-										<span className="column is-8">{item.name}</span>
+										<span className="column">{item.name}</span>
 										<span className="column">{item.date}</span>
 										<span className="column">{item.author}</span>
 										<span className="column">{item.translator}</span>
