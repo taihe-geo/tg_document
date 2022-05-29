@@ -3,7 +3,7 @@
 .app{
     width: 100vw;
     height: 100vh;
-    background-color:$black-bis;
+    // background-color:$black-bis;
 }
 .my-search{
     padding-top: 150px;
@@ -15,4 +15,7 @@
 }
 .my-table{
     width: 100%;
+}
+.pagination{
+    width: fit-content;
 }

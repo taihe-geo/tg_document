@@ -18,13 +18,14 @@ export default function () {
 			label: "进度",
 		},
 	];
-	const data = [
-		{
+	const data:any[] = [];
+	for (let i = 0; i < 100; i++) {
+		data.push({
 			name: "计划一",
 			date: dayjs().format("YYYY-MM-DD"),
 			progress: 15,
-		},
-	];
+		});
+	}
 	return (
 		<MyLayout>
 			<div className="layout-children-center">

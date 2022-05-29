@@ -1,13 +1,28 @@
 import { useEffect, useState } from "react";
-import MyPagination from './pagination'
+import MyPagination from "./pagination";
+// https://github.com/AdeleD/react-paginate
 export default function (props) {
 	const [showChild, setShowChild] = useState(false);
-	useEffect(() => {
-		setShowChild(true);
-	}, []);
+	let defaultPageSize = 10;
+
 	if (!showChild) {
 		return null;
 	}
+	if (props.pageSize) {
+		defaultPageSize = props.pageSize;
+	}
+	let _dataWithPage: any[] = [];
+	const handlePageClick = (val) => {
+		let currentPage = val.selected + 1;
+		_dataWithPage = props.data.slice(
+			currentPage * defaultPageSize,
+			(currentPage + 1) * defaultPageSize
+		);
+		console.log(_dataWithPage)
+	};
+	useEffect(() => {
+		setShowChild(true);
+	}, []);
 	return (
 		<>
 			<table className="table my-table">
@@ -19,7 +34,7 @@ export default function (props) {
 					</tr>
 				</thead>
 				<tbody>
-					{props.data.map((x, xi) => {
+					{_dataWithPage.map((x, xi) => {
 						return (
 							<tr key={xi}>
 								{props.columns.map((j, ji) => {
@@ -39,7 +54,10 @@ export default function (props) {
 					})}
 				</tbody>
 			</table>
-			<MyPagination total={100}></MyPagination>
+			<MyPagination
+				pageCount={Math.ceil(props.data.length / 10)}
+				onPageChange={handlePageClick}
+			></MyPagination>
 		</>
 	);
 }
