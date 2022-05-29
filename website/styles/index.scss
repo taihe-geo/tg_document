@@ -1,21 +1,49 @@
 // https://bulma.io/documentation/overview/start/
 @import "bulma";
-.app{
-    width: 100vw;
-    height: 100vh;
-    // background-color:$black-bis;
+.app {
+	width: 100vw;
+	height: fit-content;
+	min-height: 100vh;
+	background-color: #f0f1f3;
 }
-.my-search{
-    padding-top: 150px;
+.my-search {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	.my-input {
+		width: 60%;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		.control {
+			width: 90%;
+		}
+		margin-right: 3px;
+	}
 }
-.layout-children-center{
-    width: 100%;
-    margin-top: 100px;
-    padding: 0px 30px;
+.my-card-container {
+	margin-top: 10px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	.my-card {
+		width: 70%;
+		margin-bottom: 5px;
+		cursor: pointer;
+		&:hover {
+			@extend .has-background-primary-light;
+		}
+	}
 }
-.my-table{
-    width: 100%;
+.layout-children-center {
+	width: 100%;
+	margin-top: 50px;
+	padding: 0px 30px;
 }
-.pagination{
-    width: fit-content;
+.my-table {
+	width: 100%;
+}
+.pagination {
+	width: fit-content;
 }

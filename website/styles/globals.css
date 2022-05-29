@@ -14,3 +14,5 @@ a {
 * {
   box-sizing: border-box;
 }
+/* https://fontawesome.com/search?q=github&s=solid%2Cbrands */
+@import "@fortawesome/fontawesome-free/css/all.min.css";

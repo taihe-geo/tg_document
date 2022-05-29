@@ -38,12 +38,6 @@ export default function Home() {
 					<Link href="/home">
 						<a className="navbar-item">首页</a>
 					</Link>
-					<Link href="/standards">
-						<a className="navbar-item">标准</a>
-					</Link>
-					<Link href="/plan">
-						<a className="navbar-item">计划</a>
-					</Link>
 					<Link href="/about">
 						<a className="navbar-item">关于</a>
 					</Link>
@@ -51,20 +45,18 @@ export default function Home() {
 
 				<div className="navbar-end">
 					<div className="navbar-item">
-						<div className="buttons">
-							<Link href="https://github.com/taihe-geo/tg_document" target="_blank">
-								<button className="button">
-									<span className="icon">
-										<i className="fab fa-github"></i>
-									</span>
-									<span>GitHub</span>
-								</button>
-							</Link>
-							{/* <a className="button is-primary">
+						<Link
+							href="https://github.com/taihe-geo/tg_document"
+							target="_blank"
+						>
+							<span className="icon">
+								<i className="fa-brands fa-github"></i>
+							</span>
+						</Link>
+						{/* <a className="button is-primary">
 								<strong>登录</strong>
 							</a>
 							<a className="button is-light">注册</a> */}
-						</div>
 					</div>
 				</div>
 			</div>
