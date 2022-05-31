@@ -1,0 +1,12 @@
+.myEdit{
+	width: 30%;
+}
+.mySelectButton{
+    width: 200px;
+    height: 80px;
+	&:hover{
+		transition: all 1.5s;
+		background-color: hsl(171, 100%, 41%);
+		opacity: 0.6;
+	}
+}

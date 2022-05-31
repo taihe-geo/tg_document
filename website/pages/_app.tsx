@@ -10,6 +10,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 					name="viewport"
 					content="width=device-width, initial-scale=1"
 				></meta>
+				<link rel="icon" href="/logo.svg"></link>
 				<title>太和文档</title>
 			</Head>
 			<Component {...pageProps} />

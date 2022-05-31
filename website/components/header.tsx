@@ -5,18 +5,14 @@ export default function Home() {
 	const router = useRouter();
 	return (
 		<nav
-			className="navbar is-transparent"
+			className="navbar is-transparent my-navbar"
 			role="navigation"
 			aria-label="main navigation"
 		>
 			<div className="navbar-brand">
 				<Link href="/home">
 					<a className="navbar-item" href="">
-						<img
-							src="https://img2.baidu.com/it/u=570072581,900763034&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"
-							width="112"
-							height="28"
-						/>
+						<img className="my-logo" src={require("../public/logo2.svg")} />
 					</a>
 				</Link>
 
@@ -38,6 +34,9 @@ export default function Home() {
 					<Link href="/home">
 						<a className="navbar-item">首页</a>
 					</Link>
+					<Link href="/edit">
+						<a className="navbar-item">编辑</a>
+					</Link>
 					<Link href="/about">
 						<a className="navbar-item">关于</a>
 					</Link>
@@ -49,7 +48,7 @@ export default function Home() {
 							href="https://github.com/taihe-geo/tg_document"
 							target="_blank"
 						>
-							<span className="icon">
+							<span className="icon my-icon">
 								<i className="fa-brands fa-github"></i>
 							</span>
 						</Link>

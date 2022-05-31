@@ -1,0 +1,7 @@
+.myCssScope {
+	:global {
+		.title {
+			font-size: unset;
+		}
+	}
+}

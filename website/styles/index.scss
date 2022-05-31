@@ -6,6 +6,9 @@
 	min-height: 100vh;
 	background-color: #f0f1f3;
 }
+.my-navbar{
+	padding:0px 32px;
+}
 .my-search {
 	width: 100%;
 	display: flex;
@@ -35,6 +38,12 @@
 			@extend .has-background-primary-light;
 		}
 	}
+}
+.my-logo {
+	transform: scale(1.5);
+}
+.my-icon{
+	cursor: pointer;
 }
 .layout-children-center {
 	width: 100%;
