@@ -1,16 +1,37 @@
+use axum::extract::{Form, Path};
+use axum::routing::{delete, get, post, put};
 use axum::{
     extract::{Extension, Query},
     http::StatusCode,
     response::IntoResponse,
-    Json,
+    Json, Router,
 };
-use serde::{Deserialize,Deserializer,de, Serialize};
-use sqlx::{Error, PgPool};
-use std::{fmt, str::FromStr};
+use sea_orm::entity::prelude::*;
+use sea_orm::prelude::*;
+use sea_orm::Set;
+use serde::{de, Deserialize, Deserializer, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct TGDoc {
+use crate::models::{empty_string_as_none, MyPagination, MyResponse};
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[sea_orm(table_name = "tg_doc", schema_name = "public")]
+pub struct Model {
+    #[sea_orm(primary_key)]
     pub id: i32,
+    pub cn_name: String,
+    pub en_name: String,
+    pub doc_type: String,
+    pub link_type: String,
+    pub description: String,
+    pub author: String,
+    pub link: String,
+    pub page_no: i32,
+    pub language: String,
+    pub content: String,
+}
+#[derive(Deserialize)]
+pub struct CreateModel {
+    pub id: Option<i32>,
     pub cn_name: Option<String>,
     pub en_name: Option<String>,
     pub doc_type: Option<String>,
@@ -22,40 +43,127 @@ pub struct TGDoc {
     pub language: Option<String>,
     pub content: Option<String>,
 }
-pub async fn query_list(
-    Query(params): Query<Params>,
-    Extension(pool): Extension<PgPool>,
-) -> impl IntoResponse {
-    println!("{:#?}",&params);
-    let doc_list = sqlx::query_as!(
-        TGDoc,
-        "
-            select * from tg_doc;
-        ",
-    )
-    .fetch_all(&pool)
-    .await
-    .expect("查询失败");
-    (StatusCode::CREATED, Json(doc_list))
+#[derive(Copy, Clone, Debug, EnumIter)]
+pub enum Relation {}
+
+impl RelationTrait for Relation {
+    fn def(&self) -> RelationDef {
+        panic!("No RelationDef")
+    }
 }
 
+impl ActiveModelBehavior for ActiveModel {}
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Params {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct QueryListParams {
+    #[serde(default, deserialize_with = "empty_string_as_none")]
+    cn_name: Option<String>,
+    page_size: Option<usize>,
+    page_num: Option<usize>,
+}
+
+pub async fn query_list(
+    Query(params): Query<QueryListParams>,
+    Extension(ref conn): Extension<DatabaseConnection>,
+) -> impl IntoResponse {
+    let page_size = params.page_size.unwrap_or(10);
+    let page_num = params.page_num.unwrap_or(1);
+
+    let paginator = Entity::find().paginate(conn, page_size);
+    let total = paginator.num_items().await.ok().unwrap();
+    let pagination = MyPagination::new(page_size, page_num, total);
+
+    let records = paginator
+        .fetch_page(page_num - 1)
+        .await
+        .expect("无法获取列表");
+    return MyResponse::success_with_data(records, Some(pagination));
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FindByIdParams {
     #[serde(default, deserialize_with = "empty_string_as_none")]
     id: Option<i32>,
-    cn_name:Option<String>
 }
-/// Serde deserialization decorator to map empty Strings to None,
-fn empty_string_as_none<'de, D, T>(de: D) -> Result<Option<T>, D::Error>
-where
-    D: Deserializer<'de>,
-    T: FromStr,
-    T::Err: fmt::Display,
-{
-    let opt = Option::<String>::deserialize(de)?;
-    match opt.as_deref() {
-        None | Some("") => Ok(None),
-        Some(s) => FromStr::from_str(s).map_err(de::Error::custom).map(Some),
+
+pub async fn find_by_id(
+    Extension(ref conn): Extension<DatabaseConnection>,
+    Path(id): Path<i32>,
+) -> impl IntoResponse {
+    let find_res: Option<Model> = Entity::find_by_id(id).one(conn).await.expect("not find");
+    return match find_res {
+        Some(record) => MyResponse::success_with_data(record, None),
+        None => MyResponse::not_find(),
+    };
+}
+
+pub async fn create(
+    Json(model): Json<CreateModel>,
+    Extension(ref conn): Extension<DatabaseConnection>,
+) -> impl IntoResponse {
+    let active_model = ActiveModel {
+        cn_name: Set(model.cn_name.unwrap()),
+        en_name: Set(model.en_name.unwrap()),
+        doc_type: Set(model.doc_type.unwrap()),
+        link_type: Set(model.link_type.unwrap()),
+        description: Set(model.description.unwrap()),
+        author: Set(model.author.unwrap()),
+        link: Set(model.link.unwrap()),
+        page_no: Set(model.page_no.unwrap()),
+        language: Set(model.language.unwrap()),
+        content: Set(model.content.unwrap()),
+        ..Default::default()
+    };
+    let db_res = active_model.insert(conn).await;
+    match db_res {
+        Ok(raw) => MyResponse::success_with_data(1, None),
+        Err(e) => MyResponse::error("插入失败"),
     }
+}
+
+pub async fn update(
+    Path(id): Path<i32>,
+    Json(model): Json<CreateModel>,
+    Extension(ref conn): Extension<DatabaseConnection>,
+) -> impl IntoResponse {
+    let db_res = ActiveModel {
+        id: Set(id),
+        cn_name: Set(model.cn_name.unwrap()),
+        en_name: Set(model.en_name.unwrap()),
+        doc_type: Set(model.doc_type.unwrap()),
+        link_type: Set(model.link_type.unwrap()),
+        description: Set(model.description.unwrap()),
+        author: Set(model.author.unwrap()),
+        link: Set(model.link.unwrap()),
+        page_no: Set(model.page_no.unwrap()),
+        language: Set(model.language.unwrap()),
+        content: Set(model.content.unwrap()),
+        ..Default::default()
+    }
+    .save(conn)
+    .await;
+    match db_res {
+        Ok(raw) => MyResponse::success_with_data(1, None),
+        Err(_) => MyResponse::error("更新失败"),
+    }
+}
+
+pub async fn deleteOp(
+    Extension(ref conn): Extension<DatabaseConnection>,
+    Path(id): Path<i32>,
+) -> impl IntoResponse {
+    let post: Model = Entity::find_by_id(id)
+        .one(conn)
+        .await
+        .unwrap()
+        .unwrap()
+        .into();
+    post.delete(conn).await.unwrap();
+    MyResponse::<usize>::success();
+}
+
+pub fn route(router: Router) -> Router {
+    router
+        .route("/doc", get(query_list).post(create))
+        .route("/doc/:id", get(find_by_id).delete(deleteOp).put(update))
 }
