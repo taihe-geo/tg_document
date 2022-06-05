@@ -1,5 +1,11 @@
 use crate::route::init_router;
-use axum::{extract::Extension, response::Html, routing::get, Router};
+use axum::{
+    extract::Extension,
+    http::{HeaderValue, Method},
+    response::Html,
+    routing::get,
+    Router,
+};
 use sea_orm::{prelude::*, Database};
 use std::env;
 use std::net::SocketAddr;
@@ -7,8 +13,7 @@ use std::str::FromStr;
 use std::time::Duration;
 use tower::ServiceBuilder;
 use tower_cookies::{CookieManagerLayer, Cookies};
-use tower_http::services::ServeDir;
-
+use tower_http::cors::CorsLayer;
 mod models;
 mod route;
 
@@ -34,13 +39,31 @@ async fn main() {
     app = init_router(app).layer(
         ServiceBuilder::new()
             .layer(CookieManagerLayer::new())
-            .layer(Extension(conn)),
+            .layer(Extension(conn))
+            .layer(
+                CorsLayer::new()
+                    .allow_origin("*".parse::<HeaderValue>().unwrap())
+                    .allow_methods([
+                        Method::GET,
+                        Method::OPTIONS,
+                        Method::DELETE,
+                        Method::PUT,
+                        Method::POST,
+                        Method::HEAD,
+                        Method::PATCH,
+                        Method::TRACE,
+                        Method::CONNECT,
+                    ]),
+            ),
     );
-
     let addr = SocketAddr::from_str(&server_url).unwrap();
+    serve(app, &addr).await;
+    tracing::debug!("listening on {}", addr);
+}
+
+async fn serve(app: Router, addr: &SocketAddr) {
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
-    tracing::debug!("listening on {}", addr);
 }

@@ -11,7 +11,7 @@ axum = "0.5.4"
 tokio = { version = "1.18.1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 tower = "0.4.12"
-tower-http = { version = "0.3.3", features = ["fs"] }
+tower-http = { version = "0.3.3", features = ["fs",'cors'] }
 tower-cookies = "0.6.0"
 #orm库
 sea-orm = { version = "^0.8.0", features = ["sqlx-postgres", "runtime-tokio-native-tls", "macros", 'with-json', 'with-chrono'] }

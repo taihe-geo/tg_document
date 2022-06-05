@@ -16,6 +16,7 @@ use crate::models::{empty_string_as_none, MyPagination, MyResponse};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "tg_doc", schema_name = "public")]
+#[serde(rename_all = "camelCase")]
 pub struct Model {
     #[sea_orm(primary_key)]
     #[serde(skip_deserializing)] // Skip deserializing
@@ -44,6 +45,7 @@ impl RelationTrait for Relation {
 impl ActiveModelBehavior for ActiveModel {}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct QueryListParams {
     #[serde(default, deserialize_with = "empty_string_as_none")]
     cn_name: Option<String>,
@@ -69,12 +71,6 @@ pub async fn query_list(
     return MyResponse::success_with_data(records, Some(pagination));
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct FindByIdParams {
-    #[serde(default, deserialize_with = "empty_string_as_none")]
-    id: Option<i32>,
-}
-
 pub async fn find_by_id(
     Extension(ref conn): Extension<DatabaseConnection>,
     Path(id): Path<i32>,
@@ -91,7 +87,6 @@ pub async fn create(
     Extension(ref conn): Extension<DatabaseConnection>,
 ) -> impl IntoResponse {
     let active_model = ActiveModel {
-        id: NotSet,
         cn_name: Set(model.cn_name),
         en_name: Set(model.en_name),
         doc_type: Set(model.doc_type),
@@ -102,10 +97,11 @@ pub async fn create(
         page_no: Set(model.page_no),
         language: Set(model.language),
         content: Set(model.content),
+        ..Default::default()
     };
     let db_res = active_model.save(conn).await;
     match db_res {
-        Ok(raw) => MyResponse::success_with_data(1, None),
+        Ok(raw) => MyResponse::success_with_data(raw.id.unwrap(), None),
         Err(e) => MyResponse::error(format!("{:#?}", e)),
     }
 }

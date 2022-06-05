@@ -21,6 +21,7 @@ where
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MyPagination {
     page_size: usize,
     page_num: usize,
@@ -38,6 +39,7 @@ impl MyPagination {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MyResponse<T> {
     pub msg: String,
     pub code: i32,
