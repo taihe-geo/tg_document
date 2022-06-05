@@ -6,9 +6,10 @@ use axum::{
     response::IntoResponse,
     Json, Router,
 };
+use sea_orm::ActiveValue::NotSet;
 use sea_orm::entity::prelude::*;
 use sea_orm::prelude::*;
-use sea_orm::Set;
+use sea_orm::{ActiveValue, Set,ActiveModelTrait};
 use serde::{de, Deserialize, Deserializer, Serialize};
 
 use crate::models::{empty_string_as_none, MyPagination, MyResponse};
@@ -17,21 +18,8 @@ use crate::models::{empty_string_as_none, MyPagination, MyResponse};
 #[sea_orm(table_name = "tg_doc", schema_name = "public")]
 pub struct Model {
     #[sea_orm(primary_key)]
+    #[serde(skip_deserializing)] // Skip deserializing
     pub id: i32,
-    pub cn_name: String,
-    pub en_name: String,
-    pub doc_type: String,
-    pub link_type: String,
-    pub description: String,
-    pub author: String,
-    pub link: String,
-    pub page_no: i32,
-    pub language: String,
-    pub content: String,
-}
-#[derive(Deserialize)]
-pub struct CreateModel {
-    pub id: Option<i32>,
     pub cn_name: Option<String>,
     pub en_name: Option<String>,
     pub doc_type: Option<String>,
@@ -43,6 +31,7 @@ pub struct CreateModel {
     pub language: Option<String>,
     pub content: Option<String>,
 }
+
 #[derive(Copy, Clone, Debug, EnumIter)]
 pub enum Relation {}
 
@@ -53,6 +42,20 @@ impl RelationTrait for Relation {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[derive(Deserialize)]
+pub struct CreateModel {
+    pub cn_name: Option<String>,
+    pub en_name: Option<String>,
+    pub doc_type: Option<String>,
+    pub link_type: Option<String>,
+    pub description: Option<String>,
+    pub author: Option<String>,
+    pub link: Option<String>,
+    pub page_no: Option<i32>,
+    pub language: Option<String>,
+    pub content: Option<String>,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct QueryListParams {
@@ -98,53 +101,66 @@ pub async fn find_by_id(
 }
 
 pub async fn create(
-    Json(model): Json<CreateModel>,
+    Json(model): Json<Model>,
     Extension(ref conn): Extension<DatabaseConnection>,
 ) -> impl IntoResponse {
+    // let active_model = ActiveModel {
+    //     id: ActiveValue::NotSet,
+    //     cn_name: Set(model.cn_name),
+    //     en_name: Set(model.en_name),
+    //     doc_type: Set(model.doc_type),
+    //     link_type: Set(model.link_type),
+    //     description: Set(model.description),
+    //     author: Set(model.author),
+    //     link: Set(model.link),
+    //     page_no: Set(model.page_no),
+    //     language: Set(model.language),
+    //     content: Set(model.content),
+    // };
     let active_model = ActiveModel {
-        cn_name: Set(model.cn_name.unwrap()),
-        en_name: Set(model.en_name.unwrap()),
-        doc_type: Set(model.doc_type.unwrap()),
-        link_type: Set(model.link_type.unwrap()),
-        description: Set(model.description.unwrap()),
-        author: Set(model.author.unwrap()),
-        link: Set(model.link.unwrap()),
-        page_no: Set(model.page_no.unwrap()),
-        language: Set(model.language.unwrap()),
-        content: Set(model.content.unwrap()),
+        // id: ActiveValue::NotSet,
+        cn_name: Set(Some("test".to_string())),
+        en_name: Set(Some("test".to_string())),
+        doc_type: Set(Some("test".to_string())),
+        link_type: Set(Some("test".to_string())),
+        description: Set(Some("test".to_string())),
+        author: Set(Some("test".to_string())),
+        link: Set(Some("test".to_string())),
+        page_no: Set(Some(-1)),
+        language: Set(Some("test".to_string())),
+        content: Set(Some("test".to_string())),
         ..Default::default()
     };
-    let db_res = active_model.insert(conn).await;
+    let db_res = active_model.save(conn).await;
     match db_res {
         Ok(raw) => MyResponse::success_with_data(1, None),
-        Err(e) => MyResponse::error("插入失败"),
+        Err(e) => MyResponse::error(format!("{:#?}", e)),
     }
 }
 
 pub async fn update(
     Path(id): Path<i32>,
-    Json(model): Json<CreateModel>,
+    Json(model): Json<Model>,
     Extension(ref conn): Extension<DatabaseConnection>,
 ) -> impl IntoResponse {
     let db_res = ActiveModel {
         id: Set(id),
-        cn_name: Set(model.cn_name.unwrap()),
-        en_name: Set(model.en_name.unwrap()),
-        doc_type: Set(model.doc_type.unwrap()),
-        link_type: Set(model.link_type.unwrap()),
-        description: Set(model.description.unwrap()),
-        author: Set(model.author.unwrap()),
-        link: Set(model.link.unwrap()),
-        page_no: Set(model.page_no.unwrap()),
-        language: Set(model.language.unwrap()),
-        content: Set(model.content.unwrap()),
-        ..Default::default()
+        cn_name: Set(model.cn_name),
+        en_name: Set(model.en_name),
+        doc_type: Set(model.doc_type),
+        link_type: Set(model.link_type),
+        description: Set(model.description),
+        author: Set(model.author),
+        link: Set(model.link),
+        page_no: Set(model.page_no),
+        language: Set(model.language),
+        content: Set(model.content),
     }
-    .save(conn)
-    .await;
+        .update(conn)
+        .await;
     match db_res {
         Ok(raw) => MyResponse::success_with_data(1, None),
-        Err(_) => MyResponse::error("更新失败"),
+        Err(_) => MyResponse::error("更新失败".to_string()),
     }
 }
 

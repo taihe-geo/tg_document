@@ -79,8 +79,8 @@ where
         let res = MyResponse::new("没有找到", 100, None, None);
         return (StatusCode::CREATED, Json(res));
     }
-    pub fn error(msg: &str) -> MyResponseIntoResponse<T> {
-        let res = MyResponse::new(msg, 100, None, None);
+    pub fn error(msg:String) -> MyResponseIntoResponse<T> {
+        let res = MyResponse::new(msg.as_str(), 100, None, None);
         return (StatusCode::CREATED, Json(res));
     }
 }
