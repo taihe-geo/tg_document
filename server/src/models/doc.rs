@@ -43,20 +43,6 @@ impl RelationTrait for Relation {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-#[derive(Deserialize)]
-pub struct CreateModel {
-    pub cn_name: Option<String>,
-    pub en_name: Option<String>,
-    pub doc_type: Option<String>,
-    pub link_type: Option<String>,
-    pub description: Option<String>,
-    pub author: Option<String>,
-    pub link: Option<String>,
-    pub page_no: Option<i32>,
-    pub language: Option<String>,
-    pub content: Option<String>,
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct QueryListParams {
     #[serde(default, deserialize_with = "empty_string_as_none")]
@@ -104,32 +90,18 @@ pub async fn create(
     Json(model): Json<Model>,
     Extension(ref conn): Extension<DatabaseConnection>,
 ) -> impl IntoResponse {
-    // let active_model = ActiveModel {
-    //     id: ActiveValue::NotSet,
-    //     cn_name: Set(model.cn_name),
-    //     en_name: Set(model.en_name),
-    //     doc_type: Set(model.doc_type),
-    //     link_type: Set(model.link_type),
-    //     description: Set(model.description),
-    //     author: Set(model.author),
-    //     link: Set(model.link),
-    //     page_no: Set(model.page_no),
-    //     language: Set(model.language),
-    //     content: Set(model.content),
-    // };
     let active_model = ActiveModel {
-        // id: ActiveValue::NotSet,
-        cn_name: Set(Some("test".to_string())),
-        en_name: Set(Some("test".to_string())),
-        doc_type: Set(Some("test".to_string())),
-        link_type: Set(Some("test".to_string())),
-        description: Set(Some("test".to_string())),
-        author: Set(Some("test".to_string())),
-        link: Set(Some("test".to_string())),
-        page_no: Set(Some(-1)),
-        language: Set(Some("test".to_string())),
-        content: Set(Some("test".to_string())),
-        ..Default::default()
+        id: NotSet,
+        cn_name: Set(model.cn_name),
+        en_name: Set(model.en_name),
+        doc_type: Set(model.doc_type),
+        link_type: Set(model.link_type),
+        description: Set(model.description),
+        author: Set(model.author),
+        link: Set(model.link),
+        page_no: Set(model.page_no),
+        language: Set(model.language),
+        content: Set(model.content),
     };
     let db_res = active_model.save(conn).await;
     match db_res {
