@@ -2,15 +2,14 @@ use axum::extract::{Form, Path};
 use axum::routing::{delete, get, post, put};
 use axum::{
     extract::{Extension, Query},
-    http::StatusCode,
     response::IntoResponse,
     Json, Router,
 };
-use sea_orm::ActiveValue::NotSet;
-use sea_orm::entity::prelude::*;
+use chrono::{DateTime, Local, Utc};
 use sea_orm::prelude::*;
-use sea_orm::{ActiveValue, Set,ActiveModelTrait};
-use serde::{de, Deserialize, Deserializer, Serialize};
+use sea_orm::{ActiveModelTrait, ActiveValue, Set};
+use serde::{Deserialize, Serialize};
+use ActiveValue::NotSet;
 
 use crate::models::{empty_string_as_none, MyPagination, MyResponse};
 
@@ -19,7 +18,7 @@ use crate::models::{empty_string_as_none, MyPagination, MyResponse};
 #[serde(rename_all = "camelCase")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    #[serde(skip_deserializing)] // Skip deserializing
+    #[serde(skip_deserializing)]
     pub id: i32,
     pub cn_name: Option<String>,
     pub en_name: Option<String>,
@@ -31,6 +30,10 @@ pub struct Model {
     pub page_no: Option<i32>,
     pub language: Option<String>,
     pub content: Option<String>,
+    pub translator: Option<String>,
+
+    pub create_time: Option<DateTime<Local>>,
+    pub update_time: Option<DateTime<Local>>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter)]
@@ -86,6 +89,7 @@ pub async fn create(
     Json(model): Json<Model>,
     Extension(ref conn): Extension<DatabaseConnection>,
 ) -> impl IntoResponse {
+    let create_time = Some(Local::now());
     let active_model = ActiveModel {
         cn_name: Set(model.cn_name),
         en_name: Set(model.en_name),
@@ -97,7 +101,10 @@ pub async fn create(
         page_no: Set(model.page_no),
         language: Set(model.language),
         content: Set(model.content),
-        ..Default::default()
+        translator: Set(model.translator),
+        create_time: Set(create_time),
+        update_time: Set(create_time),
+        id: NotSet,
     };
     let db_res = active_model.save(conn).await;
     match db_res {
@@ -111,6 +118,13 @@ pub async fn update(
     Json(model): Json<Model>,
     Extension(ref conn): Extension<DatabaseConnection>,
 ) -> impl IntoResponse {
+    let update_time = Some(Local::now());
+    let create_time = Entity::find_by_id(id)
+        .one(conn)
+        .await
+        .unwrap()
+        .unwrap()
+        .create_time;
     let db_res = ActiveModel {
         id: Set(id),
         cn_name: Set(model.cn_name),
@@ -123,9 +137,12 @@ pub async fn update(
         page_no: Set(model.page_no),
         language: Set(model.language),
         content: Set(model.content),
+        translator: Set(model.translator),
+        update_time: Set(update_time),
+        create_time: Set(create_time),
     }
-        .update(conn)
-        .await;
+    .update(conn)
+    .await;
     match db_res {
         Ok(raw) => MyResponse::success_with_data(1, None),
         Err(_) => MyResponse::error("更新失败".to_string()),

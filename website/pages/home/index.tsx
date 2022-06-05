@@ -9,7 +9,7 @@ export default function () {
 	const [docList, setDocList] = useState<MyDoc[]>([]);
 	useEffect(()=>{
 		Api.queryList(10,1).then(res=>{
-			setDocList(res.data.data)
+			setDocList(res.data)
 		})
 	},[])
 	const onSearch = (text) => {
@@ -37,8 +37,8 @@ export default function () {
 								<div className="card-content">
 									<div className="content columns">
 										<span className="column">{item.docType}</span>
-										<span className="column">{item.name}</span>
-										<span className="column">{item.date}</span>
+										<span className="column">{item.cnName}</span>
+										<span className="column">{item.create_time}</span>
 										<span className="column">{item.author}</span>
 										<span className="column">{item.translator}</span>
 									</div>

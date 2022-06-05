@@ -50,4 +50,5 @@ instance.interceptors.response.use(
         })
     }
 )
-export * from './doc'
+export { queryList, findById, create, update, deleteOp, } from './doc'
+export type { MyDoc, MyLanguage, MyLinkType,} from './doc'

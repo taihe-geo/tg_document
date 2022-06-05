@@ -14,6 +14,9 @@ export interface MyDoc {
     pageNo: number,
     language: MyLanguage,
     content: string,
+    translator: string,
+    create_time: string
+    update_time: string
 }
 export function queryList(pageSize: number, pageNum: number, options?: Partial<MyDoc>) {
     return instance({
