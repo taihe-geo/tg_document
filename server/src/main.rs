@@ -6,6 +6,7 @@ use std::net::SocketAddr;
 use std::str::FromStr;
 mod models;
 mod route;
+mod jwt;
 
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
 

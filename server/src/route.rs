@@ -1,3 +1,4 @@
+use crate::jwt;
 use crate::models::doc;
 use axum::{
     extract::Extension,
@@ -10,11 +11,13 @@ use sea_orm::DatabaseConnection;
 use std::io;
 use tower_http::{cors::CorsLayer, services::ServeDir};
 pub fn init_router(conn: DatabaseConnection) -> Router {
-    let router = Router::new();
-    doc::route(router)
+    let mut router = Router::new();
+    router = doc::route(router)
         .fallback(get_service(ServeDir::new("./static")).handle_error(handle_error))
         .layer(cors())
-        .layer(Extension(conn))
+        .layer(Extension(conn));
+    router = jwt::route(router);
+    return router;
 }
 async fn handle_error(_err: io::Error) -> impl IntoResponse {
     (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
