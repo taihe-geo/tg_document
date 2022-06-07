@@ -32,7 +32,7 @@ export default function () {
 			<div className="contianer my-card-container">
 				{docList.map((item) => {
 					return (
-						<Link href={item.link}>
+						<Link href={""} key={item.id}>
 							<div className="card is-small my-card">
 								<div className="card-content">
 									<div className="content columns">
