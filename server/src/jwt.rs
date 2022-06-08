@@ -1,7 +1,7 @@
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::post,
+    routing::{post,get},
     Json, Router,
 };
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
@@ -13,9 +13,9 @@ lazy_static! {
     static ref SECRET: String = String::from("hello,world");
     static ref KEYS: Keys = Keys::new(SECRET.as_bytes());
 }
-struct Keys {
-    encoding: EncodingKey,
-    decoding: DecodingKey,
+pub struct Keys {
+    pub encoding: EncodingKey,
+    pub decoding: DecodingKey,
 }
 
 impl Keys {
@@ -28,9 +28,9 @@ impl Keys {
 }
 
 #[derive(Debug, Serialize)]
-struct AuthBody {
-    access_token: String,
-    token_type: String,
+pub struct AuthBody {
+    pub access_token: String,
+    pub token_type: String,
 }
 impl AuthBody {
     fn new(access_token: String) -> Self {
@@ -42,13 +42,13 @@ impl AuthBody {
 }
 
 #[derive(Debug, Deserialize)]
-struct AuthPayload {
-    client_id: String,
-    client_secret: String,
+pub struct AuthPayload {
+    pub client_id: String,
+    pub client_secret: String,
 }
 
 #[derive(Debug)]
-enum AuthError {
+pub enum AuthError {
     WrongCredentials,
     MissingCredentials,
     TokenCreation,
@@ -69,13 +69,13 @@ impl IntoResponse for AuthError {
         (status, body).into_response()
     }
 }
-async fn authorize(Json(payload): Json<AuthPayload>) -> Result<Json<AuthBody>, AuthError> {
+pub async fn authorize(Json(payload): Json<AuthPayload>) -> Result<Json<AuthBody>, AuthError> {
     // Check if the user sent the credentials
     if payload.client_id.is_empty() || payload.client_secret.is_empty() {
         return Err(AuthError::MissingCredentials);
     }
     // Here you can check the user credentials from a database
-    if payload.client_id != "foo" || payload.client_secret != "bar" {
+    if payload.client_id != "catnuko" || payload.client_secret != "mounts" {
         return Err(AuthError::WrongCredentials);
     }
     let claims = Claims {
@@ -91,15 +91,20 @@ async fn authorize(Json(payload): Json<AuthPayload>) -> Result<Json<AuthBody>, A
     // Send the authorized token
     Ok(Json(AuthBody::new(token)))
 }
-pub fn route(router: Router) -> Router {
-    router.route("/authorize", post(authorize))
+pub async fn protected(claims: Claims) -> Result<String, AuthError> {
+    // Send the protected data to the user
+    Ok(format!(
+        "Welcome to the protected area :)\nYour data:\n{}",
+        claims
+    ))
 }
+
 //https://www.cnblogs.com/hnxxcxg/p/11367704.html
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    sub: String, //subject,主题
-    company: String,
-    exp: usize, //expiration,到期时间
+pub struct Claims {
+    pub sub: String, //subject,主题
+    pub company: String,
+    pub exp: usize, //expiration,到期时间
 }
 
 use axum::{

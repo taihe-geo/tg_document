@@ -7,7 +7,7 @@ use std::str::FromStr;
 mod models;
 mod route;
 mod jwt;
-
+mod ws;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]

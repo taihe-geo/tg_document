@@ -162,9 +162,3 @@ pub async fn deleteOp(
     post.delete(conn).await.unwrap();
     MyResponse::<usize>::success();
 }
-
-pub fn route(router: Router) -> Router {
-    router
-        .route("/doc", get(query_list).post(create))
-        .route("/doc/:id", get(find_by_id).delete(deleteOp).put(update))
-}

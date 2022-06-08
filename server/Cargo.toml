@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 #http框架
-axum = {version="0.5.4",features=["headers"]}
+axum = {version="0.5.4",features=["headers","ws"]}
 tokio = { version = "1.18.1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 tower = "0.4.12"
